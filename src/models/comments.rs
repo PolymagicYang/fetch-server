@@ -1,12 +1,9 @@
-use serde::{Serialize, Deserialize};
-use uuid::Uuid;
-use chrono::NaiveDateTime;
+use bson::oid::ObjectId;
+use serde::{Deserialize, Serialize};
 
-#[derive(Queryable, Serialize, Deserialize)]
+#[derive(Serialize, Debug, Deserialize)]
 pub struct Comments {
-    pub id: i32,
-    pub body: String,
-    pub media_item_id: Uuid,
-    pub created_at: NaiveDateTime,
-    pub updated_at: NaiveDateTime, 
+	#[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+	pub id: Option<ObjectId>,
+	pub body: String,
 }

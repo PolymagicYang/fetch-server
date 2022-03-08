@@ -2,20 +2,22 @@ pub mod database;
 pub mod models;
 pub mod controllers;
 
-#[macro_use]
-extern crate diesel;
-extern crate dotenv;
-
-use diesel::prelude::*;
-use diesel::pg::PgConnection;
-use dotenv::dotenv;
+use dotenv;
+use mongodb::{Client, options::{ClientOptions, ResolverConfig}};
 use std::env;
+use std::error::Error;
 
-pub fn establish_connection() -> PgConnection {
-    dotenv().ok();
+pub async fn connect_to_mongo() -> Result<Client, Box<dyn Error>> {
+    dotenv::dotenv().ok();
+    let mongo_addr = 
+        env::var("MONGODB_URL").expect("You must provide the url of mongodb");
+    println!("{}", mongo_addr);
+    
+    let options = 
+        ClientOptions::parse_with_resolver_config(&mongo_addr, ResolverConfig::cloudflare())
+        .await?;
 
-    let database_url = env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
-    PgConnection::establish(&database_url)
-        .expect(&format!("Error connecting to {}", database_url))
+    let client = Client::with_options(options)?;
+
+    Ok(client)
 }
